@@ -28,6 +28,9 @@
 </nav>
 {% endblock %}
 {% block content %}
+<div class="container">
 <h1>{% block header_name %} {% endblock %}</h1>
 <hr/>
+{% block page_body %} {% endblock %}
+</div>
 {% endblock %}
