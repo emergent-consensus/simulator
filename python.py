@@ -9,7 +9,7 @@ Bootstrap(app)
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return network_page()
 
 @app.route("/network")
 def network_page():
