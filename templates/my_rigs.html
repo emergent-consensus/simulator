@@ -6,5 +6,26 @@ My Rigs
 {% endblock %}
 
 {% block page_body %}
-My Rig details
+<div class="row">
+{% for rig in rigs %}
+
+<div class="col-md-3">
+<div class="panel panel-default">
+  <div class="panel-heading">Rig {{loop.index}}</div>
+  <div class="panel-body">
+      {{ description('Hashpower', rig.hashpower ~ ' GHash/s')  }}
+      {{ description('Status', 'Paused') }}
+      {{ description('Cost', '0.5uBTC/sec')  }}
+      {{ description('Total Revenue', '37.8321mBTC') }}
+      {{ description('Total Expenses', '30.5mBTC') }}
+      {{ description('Total Orphans', '1 Block') }}
+      </div>
+</div>
+
+</div>
+{% endfor %}
+</div>
+
+
 {% endblock %}
+

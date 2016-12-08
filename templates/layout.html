@@ -34,3 +34,8 @@
 {% block page_body %} {% endblock %}
 </div>
 {% endblock %}
+
+
+{% macro description(label, value) %}
+<b>{{label}}:</b> {{value}}<br/>
+{% endmacro %}
