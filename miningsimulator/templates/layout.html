@@ -1,10 +1,19 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}Bitcoin Mining Simulator{% endblock %}
+
+{% block head %}
+{{ super() }}
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+{% endblock %}
+
 {% block navbar %}
 
 {% set navigation_bar = [
     ('/network', 'network', 'Network'),
-    ('/my-rigs', 'my-rigs', 'My Rigs')
+    ('/my-rigs', 'my-rigs', 'My Rigs'),
+    ('/login', 'login', 'Login')
 ] %}
 {% set active_page = active_page|default('index') %}
 
@@ -21,6 +30,9 @@
   <li{% if id == active_page %} class="active"{% endif%}><a href="{{ href|e }}">{{ caption|e }}</a></li>
 {% endfor %} 
       </ul>
+       <p class="navbar-text navbar-right" id="connected-count"></p>
+       <p class="navbar-text navbar-right" id="connected-id"></p>
+      
     </div><!-- /.navbar-collapse -->
 
     <div
@@ -33,8 +45,15 @@
 <hr/>
 {% block page_body %} {% endblock %}
 </div>
+
 {% endblock %}
 
+{% block scripts %}
+{{ super() }}
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+{% endblock %}
 
 {% macro description(label, value) %}
 <b>{{label}}:</b> {{value}}<br/>

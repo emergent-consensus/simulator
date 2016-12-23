@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="{{ url_for('static', filename='Treant.css') }}" rel="stylesheet" />
+<meta charset=utf-8 />
+
+<title>Performance tuning</title>
+</head>
+<body>
+    <input type="button" onClick="addNode()" name="Add Node"/>
+<div id="tree-simple" style="width:335px; height: 160px"> </div>
+    <script src="{{ url_for('static', filename='vendor/raphael.js') }}"></script>
+    <script src="{{ url_for('static', filename='Treant.js') }}"></script>
+
+
+    <script>
+
+
+var simple_chart_config = {
+    chart: {
+        container: "#tree-simple",
+        rootOrientation: "WEST",
+        connectors: {type: "bCurve"}
+    },
+    
+    nodeStructure: {
+        text: { name: "Parent node" },
+        id: "HEAD", 
+        children: [
+            {
+                text: { name: "First child" },
+                id: "ABC"
+            },
+            {
+                text: { name: "Second child" },
+                id: "DEF"
+            }
+        ]
+    },
+};
+
+var my_chart = new Treant(simple_chart_config);
+
+var addNode = function()
+{
+    my_chart.tree.addNode(my_chart.tree.nodeDB.get(0), {text: { name:"New Child"}, id: "GHI"});    
+}
+
+
+    </script>
+</body>
+</html>

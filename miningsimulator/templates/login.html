@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% set active_page = "login" %}
+
+{% block header_name %}
+Login
+{% endblock %}
+
+{% block page_body %}
+ <form action="{{ url_for('login_page') }}" method="post">
+            <input type="text" name="email" />
+            <input type="password" name="password" />
+            {{ form.csrf_token }}
+            <input type="submit" name="submit" />
+        </form>
+
+
+{% endblock %}
+
