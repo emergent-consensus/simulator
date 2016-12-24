@@ -5,6 +5,9 @@ from app import miners, connectionmanager
 import uuid
 from flask_socketio import SocketIO, emit
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
 app = Flask(__name__)
 
 connectionmanager = connectionmanager.ConnectionManager()
@@ -13,6 +16,20 @@ Bootstrap(app)
 socketio = SocketIO(app)
 
 rigs = [miners.MiningRig(123), miners.MiningRig(456), miners.MiningRig(789), miners.MiningRig(532), miners.MiningRig(10)]
+
+@app.before_first_request
+def before_request():
+    print "init"
+    apsched = BackgroundScheduler()
+
+    apsched.add_job(
+    func=checkFirstAPI,
+    trigger=IntervalTrigger(seconds=5))
+    apsched.start()
+
+def checkFirstAPI():
+    print "job"
+    socketio.emit("tick", namespace="/mining")
 
 @app.route("/")
 def main_page():
