@@ -1,14 +1,13 @@
 from flask import Flask, request, session, Response, redirect, url_for, render_template, json
 app = Flask(__name__)
 from flask_bootstrap import Bootstrap
-from app import miners
+from app import miners, connectionmanager
 import uuid
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 
-connections = dict()
-sessions = dict()
+connectionmanager = connectionmanager.ConnectionManager()
 
 Bootstrap(app)
 socketio = SocketIO(app)
@@ -41,45 +40,20 @@ def get_and_set_cookie(request, response):
     return uuid.UUID(request.cookies['userid'])
 
 def send_connection():
-    global connections
     response = dict()
-    response["count"] = len(connections)
-    print "Sending connection message "
-    socketio.broadcast.emit('connection', response, namespace="/mining")
-
-@socketio.on('connect', namespace='/mining')
-def connect():
-    send_connection()
-    print('message connection')
+    response["count"] = str(connectionmanager.num_users())
+    print "Sending connection message " + response["count"]
+    socketio.emit('connection', response, namespace="/mining")
 
 @socketio.on('disconnect', namespace='/mining')
 def disconnect():
-    global sessions
-    global connections
-    if request.sid in sessions:
-        userid = sessions[request.sid]
-        connections[userid].remove(request.sid)
-        if len(connections[userid]) == 0:
-            del connections[userid]
-        del sessions[request.sid]
+    connectionmanager.disconnect(request.sid)
     send_connection()
 
 @socketio.on('identify', namespace='/mining')
 def identify(data):
-    print str(data)
-    print "identify"
-    global connections
-    global sessions
-    if "userid" in data:
-        print data["userid"]
-        if data["userid"] in connections:
-            connections[data["userid"]].append(request.sid)
-            print "appending"
-        else:
-            connections[data["userid"]] = [request.sid]
-            print "setting new"
-        sessions[request.sid] = data["userid"]
-    print len(connections)
-
+    connectionmanager.add_user(data["userid"], request.sid)
+    send_connection()
+  
 if __name__ == "__main__":
     socketio.run(app)
