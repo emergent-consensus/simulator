@@ -1,13 +1,16 @@
 class User:
     def __init__(self, userid):
         self._userid = userid
-        self._miningblock = None
+        self.miningblock = None
         self.sessions = []
+        self.blocks_found = 0
     
-    def add_session(sessionid):
+    def add_session(self, sessionid):
         self.sessions.append(sessionid)
     
-    def remove_session(sessionid):
-        self.sessions.remove(sessionid)
+    def remove_session(self, sessionid):
+        if sessionid in self.sessions:
+            self.sessions.remove(sessionid)
 
-    
+    def set_parent(self, blockid):
+        self.miningblock = blockid
