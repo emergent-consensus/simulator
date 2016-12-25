@@ -48,6 +48,11 @@ def checkForBlocks():
             found = block.Block(user.miningblock, uuid.uuid4())
             new_blocks.append(found)
             user.miningblock = found
+            block_data = dict()
+            block_data["id"] = found.id.hex
+            block_data["height"] = found.height
+            block_data["miner"] = userid
+            socketio.emit('block-found', block_data, namespace="/mining")
             print "Found Block " + found.id.hex + " for user " + userid
             print "Height " + str(found.height)
         else:

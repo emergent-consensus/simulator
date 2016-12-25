@@ -21,9 +21,8 @@ $(function(){
         $("#connected-count").html(data.count + " Connected");
     });
 
-    app.socket.on('tick', function(data) {
-        tickCount += 5;
-        $("#tick-count").html(tickCount);
+    app.socket.on('block-found', function(data) {
+        $("#block-history").append("<div>" + data.id + " " + data.miner + " " + data.height + "</div>")
     });
 
 });
