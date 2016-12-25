@@ -7,13 +7,17 @@ from flask_socketio import SocketIO, emit
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+import random
 
 app = Flask(__name__)
 
 connectionmanager = connectionmanager.ConnectionManager()
 
+blocks = []
+
 Bootstrap(app)
 socketio = SocketIO(app)
+sysrandom = random.SystemRandom()
 
 rigs = [miners.MiningRig(123), miners.MiningRig(456), miners.MiningRig(789), miners.MiningRig(532), miners.MiningRig(10)]
 
@@ -23,12 +27,17 @@ def before_request():
     apsched = BackgroundScheduler()
 
     apsched.add_job(
-    func=checkFirstAPI,
-    trigger=IntervalTrigger(seconds=5))
+    func=checkForBlocks,
+    trigger=IntervalTrigger(seconds=1))
     apsched.start()
 
-def checkFirstAPI():
-    print "job"
+def checkForBlocks():
+    difficulty = 10 * connectionmanager.num_users()
+    for user in connectionmanager._users:
+        if sysrandom.randint(0, difficulty) == 0:
+            print "got a block! " + user 
+        else:
+            print "no block"
     socketio.emit("tick", namespace="/mining")
 
 @app.route("/")
