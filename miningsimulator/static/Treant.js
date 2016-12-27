@@ -1937,7 +1937,7 @@
 
 		// safe guard and check to see if it has a collapse switch
 		var nodeSwitchEl = UTIL.findEl( '.collapse-switch', true, nodeEl );
-		if ( !nodeSwitchEl && nodeEl !== undefined) {
+		if ( !nodeSwitchEl && nodeEl !== undefined && this.collapsable) {
 			nodeSwitchEl = document.createElement( 'a' );
 			nodeSwitchEl.className = "collapse-switch";
 

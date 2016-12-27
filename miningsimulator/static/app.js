@@ -21,17 +21,21 @@ $(function(){
         $("#connected-count").html(data.count + " Connected");
     });
 
+    createNode = function(blockId, minerId, blockHeight) {
+        return {text: { name: blockHeight}, collapsable: false, HTMLid: blockId}
+    }
+
     app.socket.on('block-found', function(data) {
-        
         $("#block-history").append("<div>" + data.id + " " + data.miner + " " + data.height + "</div>")
-        app.network.addNode(data.height + ": " + data.id, data.id, data.parentid)
+        app.network.addNode(data.id, data.miner, data.height, data.parentid)
     });
+
 
     app.socket.on('best-nodes', function(data) {
         $("#block-history").html();
         nodes = data.map(function(item) {
             $("#block-history").append("<div>" + item.id + " " + item.miner + " " + item.height + "</div>")
-            return {text: { name: item.height + ": " + item.id }, HTMLid: item.id};
+            return createNode(item.id, item.miner, item.height);
         });
         app.network.setInitialState(nodes);
     });
@@ -58,17 +62,15 @@ $(function(){
             app.network.my_chart = new Treant(simple_chart_config);
         }
 
-        app.network.addNode = function(name, id, parentid)
+        app.network.addNode = function(blockId, minerId, height, parentId)
         {
             var node;
             app.network.my_chart.tree.nodeDB.walk(function (item) {
-                if (item.nodeHTMLid === parentid)
+                if (item.nodeHTMLid === parentId)
                     node = item;
             });
-            if(node !== undefined)
-               app.network.my_chart.tree.addNode(node, {text: { name: name}, collapsable: false, HTMLid: id});    
-            else
-                alert(parentid);
+            var newNode = app.network.my_chart.tree.addNode(node, createNode(blockId, minerId, height));  
+            $(newNode.nodeDOM).css({backgroundColor: "#" + minerId.substr(0, 6)});
         }
     };
 
