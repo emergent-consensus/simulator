@@ -4,6 +4,7 @@
 {% block head %}
 {{ super() }}
 
+<link href="{{ url_for('static', filename='Treant.css') }}" rel="stylesheet" />
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
 {% endblock %}

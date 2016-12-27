@@ -28,15 +28,16 @@ sysrandom = random.SystemRandom()
 
 rigs = [miners.MiningRig(123), miners.MiningRig(456), miners.MiningRig(789), miners.MiningRig(532), miners.MiningRig(10)]
 
-@app.before_first_request
-def before_request():
-    print "init"
-    apsched = BackgroundScheduler()
 
-    apsched.add_job(
-    func=checkForBlocks,
-    trigger=IntervalTrigger(seconds=1))
-    apsched.start()
+apsched = BackgroundScheduler()
+
+  
+def pick_new_block(user):
+    global longest_blocks
+    block_saw_first = longest_blocks[sysrandom.randint(0, len(longest_blocks)-1)]
+    user.miningblock = block_saw_first
+    print "Updating Block for user " + user._userid + " block " + block_saw_first.id.hex
+    return block_saw_first
 
 def checkForBlocks():
     difficulty = 10 * connectionmanager.num_users()
@@ -47,11 +48,9 @@ def checkForBlocks():
         if sysrandom.randint(0, difficulty) == 0:
             found = block.Block(user.miningblock, uuid.uuid4())
             new_blocks.append(found)
+            block_data = {"id": found.id.hex, "height": found.height, "miner": userid, "parentid": user.miningblock.id.hex}
             user.miningblock = found
-            block_data = dict()
-            block_data["id"] = found.id.hex
-            block_data["height"] = found.height
-            block_data["miner"] = userid
+            print "emitting"
             socketio.emit('block-found', block_data, namespace="/mining")
             print "Found Block " + found.id.hex + " for user " + userid
             print "Height " + str(found.height)
@@ -60,15 +59,22 @@ def checkForBlocks():
 
     num_blocks_found = len(new_blocks)
     if num_blocks_found > 0:
+        global longest_blocks
+        print longest_blocks
+        longest_blocks = new_blocks
         for user in missing_users:
-            block_saw_first = new_blocks[sysrandom.randint(0, len(new_blocks)-1)]
-            user.miningblock = block_saw_first
-            print "Updating Block for user " + user._userid + " block " + block_saw_first.id.hex
+            pick_new_block(user)
+
     else:
         print "no blocks were found"
 
 
-    socketio.emit("tick", namespace="/mining")
+
+apsched.add_job(
+    func=checkForBlocks,
+    trigger=IntervalTrigger(seconds=1))
+apsched.start()
+
 
 @app.route("/")
 def main_page():
@@ -109,8 +115,13 @@ def disconnect():
 @socketio.on('identify', namespace='/mining')
 def identify(data):
     connectionmanager.add_user(data["userid"], request.sid)
-    connectionmanager._users[data["userid"]].miningblock = genesis_block #TODO PICK RANDOM MAX HEIGHT BLOCK
     send_connection()
-  
+    user = connectionmanager._users[data["userid"]]
+    found = pick_new_block(user)
+    best_nodes = []
+    for one_block in longest_blocks:
+        best_nodes.append({"id": one_block.id.hex, "height": one_block.height, "miner": ""})
+    socketio.emit('best-nodes', best_nodes, room=request.sid, namespace='/mining')
+   
 if __name__ == "__main__":
     socketio.run(app)

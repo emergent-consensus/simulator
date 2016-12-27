@@ -11,17 +11,16 @@ Network
 {% endblock %}
 
 {% block page_body %}
-Network  details
-<div id="block-history">
+    <script src="{{ url_for('static', filename='vendor/raphael.js') }}"></script>
+    <script src="{{ url_for('static', filename='Treant.js') }}"></script>
 
-</div>
 
-<div id="cy"></div>
+    <div id="tree-simple" style="width:100%; height: 300px"> </div>
+    <div id="block-history"></div>
 
 {% endblock %}
 {% block scripts %}
 {{ super() }}
 <script>
-
 </script>
 {% endblock %}
