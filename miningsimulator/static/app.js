@@ -65,7 +65,7 @@ $(function(){
         app.network.addNode = function(blockId, minerId, height, parentId)
         {
             var node;
-            app.network.my_chart.tree.nodeDB.walk(function (item) {
+            app.network.my_chart.tree.getNodeDb().walk(function (item) {
                 if (item.nodeHTMLid === parentId)
                     node = item;
             });

@@ -14,3 +14,6 @@ class User:
 
     def set_parent(self, blockid):
         self.miningblock = blockid
+
+    def __str__(self):
+        return self._userid.hex

@@ -24,13 +24,11 @@ longest_blocks = [genesis_block]
 
 Bootstrap(app)
 socketio = SocketIO(app)
-sysrandom = random.SystemRandom()
 
 rigs = [miners.MiningRig(123), miners.MiningRig(456), miners.MiningRig(789), miners.MiningRig(532), miners.MiningRig(10)]
 
 
 apsched = BackgroundScheduler()
-
   
 def pick_new_block(user):
     global longest_blocks
@@ -38,6 +36,10 @@ def pick_new_block(user):
     user.miningblock = block_saw_first
     print "Updating Block for user " + user._userid + " block " + block_saw_first.id.hex
     return block_saw_first
+
+
+def on_block_found(block):
+    socketio.emit("block-found", {"id": block.id.hex, "height": block.height, "miner": block.miner.user.userid.hex, "parentid": block.miner.user.miningblock.id.hex})
 
 def checkForBlocks():
     difficulty = 10 * connectionmanager.num_users()
