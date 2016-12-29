@@ -16,4 +16,4 @@ class User:
         self.miningblock = blockid
 
     def __str__(self):
-        return self._userid.hex
+        return self._userid

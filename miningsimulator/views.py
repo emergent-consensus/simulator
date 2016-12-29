@@ -1,7 +1,7 @@
 from flask import Flask, request, session, Response, redirect, url_for, render_template, json
 app = Flask(__name__)
 from flask_bootstrap import Bootstrap
-from app import miners, connectionmanager, block
+from app import miners, connectionmanager, block, miningnetwork
 import uuid
 from flask_socketio import SocketIO, emit
 import os
@@ -9,74 +9,25 @@ import os
 import logging
 logging.basicConfig()
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-import random
-
 app = Flask(__name__)
 
+
 connectionmanager = connectionmanager.ConnectionManager()
-
-genesis_block = block.Block(None, uuid.uuid4())
-print "Genesis Block: " + genesis_block.id.hex
-
-longest_blocks = [genesis_block]
 
 Bootstrap(app)
 socketio = SocketIO(app)
 
-rigs = [miners.MiningRig(123), miners.MiningRig(456), miners.MiningRig(789), miners.MiningRig(532), miners.MiningRig(10)]
-
-
-apsched = BackgroundScheduler()
-  
-def pick_new_block(user):
-    global longest_blocks
-    block_saw_first = longest_blocks[sysrandom.randint(0, len(longest_blocks)-1)]
-    user.miningblock = block_saw_first
-    print "Updating Block for user " + user._userid + " block " + block_saw_first.id.hex
-    return block_saw_first
-
-
 def on_block_found(block):
-    socketio.emit("block-found", {"id": block.id.hex, "height": block.height, "miner": block.miner.user.userid.hex, "parentid": block.miner.user.miningblock.id.hex})
+    id = block.id.hex
+    miner = block.miner.user._userid
+    parentid = block.parent.id.hex
+    socketio.emit("block-found", {"id": block.id.hex, "height": block.height, "miner": block.miner.user._userid, "parentid": block.parent.id.hex}, namespace="/mining")
+    print block
 
-def checkForBlocks():
-    difficulty = 10 * connectionmanager.num_users()
-    new_blocks = []
-    missing_users = []
-    for userid in connectionmanager._users:
-        user = connectionmanager._users[userid]
-        if sysrandom.randint(0, difficulty) == 0:
-            found = block.Block(user.miningblock, uuid.uuid4())
-            new_blocks.append(found)
-            block_data = {"id": found.id.hex, "height": found.height, "miner": userid, "parentid": user.miningblock.id.hex}
-            user.miningblock = found
-            print "emitting"
-            socketio.emit('block-found', block_data, namespace="/mining")
-            print "Found Block " + found.id.hex + " for user " + userid
-            print "Height " + str(found.height)
-        else:
-            missing_users.append(user)
+def on_block_not_found():
+    print "Block not found"
 
-    num_blocks_found = len(new_blocks)
-    if num_blocks_found > 0:
-        global longest_blocks
-        print longest_blocks
-        longest_blocks = new_blocks
-        for user in missing_users:
-            pick_new_block(user)
-
-    else:
-        print "no blocks were found"
-
-
-
-apsched.add_job(
-    func=checkForBlocks,
-    trigger=IntervalTrigger(seconds=1))
-apsched.start()
-
+network = miningnetwork.MiningNetwork(on_block_found, on_block_not_found)
 
 @app.route("/")
 def main_page():
@@ -87,10 +38,6 @@ def network_page():
     response = app.make_response(render_template('network.html'))
     cookie = get_and_set_cookie(request, response)
     return response
-
-@app.route("/my-rigs")
-def myrig_page():
-    return render_template('my_rigs.html', rigs= rigs)
 
 @app.route("/graph")
 def graph_page():    
@@ -117,11 +64,15 @@ def disconnect():
 @socketio.on('identify', namespace='/mining')
 def identify(data):
     connectionmanager.add_user(data["userid"], request.sid)
+
     send_connection()
     user = connectionmanager._users[data["userid"]]
-    found = pick_new_block(user)
+
+    users_miner = miners.MiningRig(100, user)
+    network.add_miner(users_miner)
+#    found = pick_new_block(user)
     best_nodes = []
-    for one_block in longest_blocks:
+    for one_block in network.current_tips:
         best_nodes.append({"id": one_block.id.hex, "height": one_block.height, "miner": ""})
     socketio.emit('best-nodes', best_nodes, room=request.sid, namespace='/mining')
    

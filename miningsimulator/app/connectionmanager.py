@@ -5,10 +5,6 @@ class ConnectionManager:
     def __init__(self):
         self._sessions = dict()
         self._users = dict()
-        apsched.add_job(
-            func=checkForBlocks,
-            trigger=IntervalTrigger(seconds=1))
-        apsched.start()
 
     def add_user(self, userid, sessionid):
         self._sessions[sessionid] = userid
