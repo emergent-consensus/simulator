@@ -4,6 +4,8 @@
 {% block head %}
 {{ super() }}
 
+<link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='Treant.css') }}" rel="stylesheet" />
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
 {% endblock %}
@@ -12,7 +14,6 @@
 
 {% set navigation_bar = [
     ('/network', 'network', 'Network'),
-    ('/my-rigs', 'my-rigs', 'My Rigs'),
 ] %}
 {% set active_page = active_page|default('index') %}
 
@@ -29,6 +30,7 @@
   <li{% if id == active_page %} class="active"{% endif%}><a href="{{ href|e }}">{{ caption|e }}</a></li>
 {% endfor %} 
       </ul>
+       <p class="navbar-text navbar-right" id="tick-count"></p>
        <p class="navbar-text navbar-right" id="connected-count"></p>
        <p class="navbar-text navbar-right" id="connected-id"></p>
       
