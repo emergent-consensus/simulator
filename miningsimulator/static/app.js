@@ -22,7 +22,7 @@ $(function(){
     });
 
     createNode = function(blockId, minerId, blockHeight) {
-        return {text: { name: blockHeight}, collapsable: false, HTMLid: blockId}
+        return {innerHTML: "<div>" + blockHeight + "</div>", collapsable: false, HTMLid: blockId}
     }
 
     app.socket.on('block-found', function(data) {
@@ -60,6 +60,12 @@ $(function(){
                 }
             };
             app.network.my_chart = new Treant(simple_chart_config);
+            
+
+                app.network.my_chart.tree.getNodeDb().walk(function (item) {
+                           
+                $(item.nodeDOM).children().css({padding: "10px"});
+            });
         }
 
         app.network.addNode = function(blockId, minerId, height, parentId)
@@ -77,7 +83,7 @@ $(function(){
             if (red*0.299 + green*0.587 + cyan*0.114 > 128) {
                 foreground = "#000000";
             }
-            $(newNode.nodeDOM).css({backgroundColor: "#" + minerId.substr(0, 6)}).children().css({color: foreground});
+            $(newNode.nodeDOM).css({backgroundColor: "#" + minerId.substr(0, 6)}).children().css({color: foreground, padding: "10px"});
         }
     };
 

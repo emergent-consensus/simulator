@@ -1,5 +1,6 @@
 import random
 from block import Block
+from miners import MiningRig
 import uuid
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -41,7 +42,8 @@ class MiningNetwork:
                 found = Block(miner.mining_block, uuid.uuid4(), miner)
                 new_blocks.append(found)
                 miner.mining_block = found
-                self._block_found_callback(found)
+                if self._block_found_callback != None:
+                    self._block_found_callback(found)
             else:
                 missing_miners.append(miner)
 
@@ -50,9 +52,10 @@ class MiningNetwork:
             self.current_tips = new_blocks
             for miner in missing_miners:
                 miner.mining_block = self.pick_random_tip()
-        else:
+        elif self._block_not_found_callback != None:
             self._block_not_found_callback()
    
-    def add_miner(self, miner):
+    def add_miner(self, hashpower, user):
+        miner = MiningRig(100, user)
         miner.mining_block = self.pick_random_tip()
         self.miners.append(miner)

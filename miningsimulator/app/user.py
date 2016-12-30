@@ -1,7 +1,7 @@
 class User:
     def __init__(self, userid):
         self._userid = userid
-        self.miningblock = None
+        self._miningrigs = []
         self.sessions = []
         self.blocks_found = 0
     
