@@ -70,7 +70,14 @@ $(function(){
                     node = item;
             });
             var newNode = app.network.my_chart.tree.addNode(node, createNode(blockId, minerId, height));  
-            $(newNode.nodeDOM).css({backgroundColor: "#" + minerId.substr(0, 6)});
+            var red =  parseInt(minerId.substr(0, 2), 16);
+            var green =  parseInt(minerId.substr(2, 2), 16);
+            var cyan = parseInt(minerId.substr(4, 2), 16);      
+            var foreground = "#dddddd";
+            if (red*0.299 + green*0.587 + cyan*0.114 > 128) {
+                foreground = "#000000";
+            }
+            $(newNode.nodeDOM).css({backgroundColor: "#" + minerId.substr(0, 6)}).children().css({color: foreground});
         }
     };
 
