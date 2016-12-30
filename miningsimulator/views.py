@@ -1,14 +1,9 @@
 from flask import Flask, request, Response, render_template
 from flask_bootstrap import Bootstrap
-
 from app import connectionmanager, miningnetwork, socketapi
-
 app = Flask(__name__)
 
-import uuid
-
-from flask_socketio import SocketIO, emit
-
+from flask_socketio import SocketIO
 import os
 
 import logging
